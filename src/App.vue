@@ -205,6 +205,14 @@ export default {
   },
   created() {
     this.fetchCoinlist();
+
+    const tickersData = localStorage.getItem("Crypto-list");
+    if (tickersData) {
+      this.tickers = JSON.parse(tickersData);
+      this.tickers.forEach((ticker) => {
+        this.subscribeToUpdates(ticker.name);
+      });
+    }
   },
   methods: {
     arrayCoinListShow() {
@@ -243,10 +251,24 @@ export default {
       const finalRes = await res.json();
       this.coinlist = finalRes.Data;
     },
+    subscribeToUpdates(tickerName) {
+      setInterval(async () => {
+        const f = await fetch(
+          `https://min-api.cryptocompare.com/data/price?fsym=${tickerName}&tsyms=USD&api_key=d7da818d405f0fd6d7cbcd2fd246ba2cba24f8afae806e7fe14a825d58b84e00`
+        );
+        const data = await f.json();
+        this.tickers.find((t) => t.name === tickerName).price =
+          data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+        if (this.sel?.name == tickerName) {
+          this.graph.push(data.USD);
+        }
+      }, 3000);
+    },
+
     add() {
       this.arrayCoinTrue = [];
       const CurrentTicker = {
-        name: this.ticker,
+        name: this.ticker.toUpperCase(),
         price: "-",
       };
 
@@ -255,19 +277,10 @@ export default {
       } else {
         this.tickers.push(CurrentTicker);
       }
-
-      setInterval(async () => {
-        const f = await fetch(
-          `https://min-api.cryptocompare.com/data/price?fsym=${CurrentTicker.name}&tsyms=USD&api_key=d7da818d405f0fd6d7cbcd2fd246ba2cba24f8afae806e7fe14a825d58b84e00`
-        );
-        const data = await f.json();
-        this.tickers.find((t) => t.name === CurrentTicker.name).price =
-          data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
-        if (this.sel?.name == CurrentTicker.name) {
-          this.graph.push(data.USD);
-        }
-      }, 3000);
+      localStorage.setItem("Crypto-list", JSON.stringify(this.tickers));
+      console.log(this.ticker);
       this.ticker = "";
+      this.subscribeToUpdates(CurrentTicker.name);
     },
 
     Select(ticker) {
