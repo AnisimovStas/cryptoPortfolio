@@ -92,9 +92,27 @@
       </section>
       <template v-if="tickers.length > 0">
         <hr class="w-full border-t border-gray-600 my-4" />
+        <p class="space-x-1">
+          <button
+            v-if="page > 1"
+            @click="page = page - 1"
+            class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            Назад
+          </button>
+          <button
+            v-if="hasNextPage"
+            @click="page = page + 1"
+            class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            Вперед
+          </button>
+          Фильтр: <input v-model="filter" />
+        </p>
+        <hr class="w-full border-t border-gray-600 my-4" />
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div
-            v-for="t in tickers"
+            v-for="t in filtredTickers()"
             :key="t.name"
             @click="Select(t)"
             :class="{
@@ -194,9 +212,28 @@ export default {
       arrayCoin: [],
       arrayCoinTrue: [],
       arrayCoinTrueShow: false,
+      page: 1,
+      filter: "",
+      hasNextPage: true,
     };
   },
   watch: {
+    filter() {
+      this.page = 1;
+
+      history.pushState(
+        null,
+        document.title,
+        `${window.location.pathname}?filter=${this.filter}&page=${this.page}`
+      );
+    },
+    page() {
+      history.pushState(
+        null,
+        document.title,
+        `${window.location.pathname}?filter=${this.filter}&page=${this.page}`
+      );
+    },
     ticker() {
       this.watchElement();
 
@@ -204,6 +241,15 @@ export default {
     },
   },
   created() {
+    const windowData = Object.fromEntries(
+      new URL(window.location).searchParams.entries()
+    );
+    if (windowData.filter) {
+      this.filter = windowData.filter;
+    }
+    if (windowData.page) {
+      this.page = windowData.page;
+    }
     this.fetchCoinlist();
 
     const tickersData = localStorage.getItem("Crypto-list");
@@ -215,6 +261,16 @@ export default {
     }
   },
   methods: {
+    filtredTickers() {
+      const start = (this.page - 1) * 6;
+      const end = this.page * 6;
+      const filtredTickers = this.tickers.filter((ticker) =>
+        ticker.name.includes(this.filter.toUpperCase())
+      );
+      this.hasNextPage = filtredTickers.length > end;
+      return filtredTickers.slice(start, end);
+    },
+
     arrayCoinListShow() {
       this.arrayCoin = [];
       this.coinlistName = Object.keys(this.coinlist);
@@ -236,7 +292,7 @@ export default {
     },
 
     watchElement() {
-      if (this.tickers.some((t) => t.name == this.ticker)) {
+      if (this.tickers.some((t) => t.name == this.ticker.toUpperCase())) {
         this.tickerInArray = true;
         console.log(this.tickerInArray);
       } else {
@@ -266,6 +322,7 @@ export default {
     },
 
     add() {
+      this.filter = "";
       this.arrayCoinTrue = [];
       const CurrentTicker = {
         name: this.ticker.toUpperCase(),
@@ -278,7 +335,7 @@ export default {
         this.tickers.push(CurrentTicker);
       }
       localStorage.setItem("Crypto-list", JSON.stringify(this.tickers));
-      console.log(this.ticker);
+
       this.ticker = "";
       this.subscribeToUpdates(CurrentTicker.name);
     },
