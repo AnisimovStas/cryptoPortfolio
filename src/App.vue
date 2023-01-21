@@ -28,6 +28,7 @@
     </div>
     <!-- начало  приложения-->
     <div class="container">
+      <!--top coin input menu-->
       <section>
         <div class="flex">
           <div class="max-w-xs">
@@ -74,7 +75,6 @@
           type="button"
           class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
         >
-          <!-- Heroicon name: solid/mail -->
           <svg
             class="-ml-0.5 mr-2 h-6 w-6"
             xmlns="http://www.w3.org/2000/svg"
@@ -90,8 +90,10 @@
           Добавить
         </button>
       </section>
+      <!-- main content-->
       <template v-if="tickers.length > 0">
         <hr class="w-full border-t border-gray-600 my-4" />
+        <!-- filter -->
         <p class="space-x-1">
           <button
             v-if="page > 1"
@@ -110,6 +112,7 @@
           Фильтр: <input v-model="filter" />
         </p>
         <hr class="w-full border-t border-gray-600 my-4" />
+        <!--token cards-->
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div
             v-for="t in filtredTickers()"
@@ -151,7 +154,8 @@
         </dl>
         <hr class="w-full border-t border-gray-600 my-4" />
       </template>
-      <!--ГРАФИК-->
+
+      <!--chart-->
       <section v-if="sel" class="relative">
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
           {{ sel.name }} - USD
