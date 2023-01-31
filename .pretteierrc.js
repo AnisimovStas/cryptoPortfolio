@@ -1,3 +1,9 @@
 module.exports = {
-  trailingComma: true,
+  trailingComma: false,
+  usePrettierrc: false,
+  endOfLine: "auto",
+  error: {
+    singleQuote: true,
+    parser: "flow",
+  },
 };
