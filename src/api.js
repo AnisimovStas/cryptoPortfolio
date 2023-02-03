@@ -6,15 +6,28 @@ const socket = new WebSocket(
   `wss://streamer.cryptocompare.com/v2?api_key=${API_KEY}`
 );
 const AGGREGATE_INDEX = "5";
+const INVALID_SUB = "500";
 socket.addEventListener("message", (e) => {
   const {
     TYPE: type,
     FROMSYMBOL: currency,
     PRICE: newPrice,
+    PARAMETER: invalidCurrency,
   } = JSON.parse(e.data);
+  if (type == INVALID_SUB) {
+    let preTrimmedInvalidCurrency = invalidCurrency.slice(9);
+    let tailOfPreTrimmedInvalidCurrency =
+      preTrimmedInvalidCurrency.indexOf("~");
+    let trimmedInvalidCurrency = preTrimmedInvalidCurrency.slice(
+      0,
+      tailOfPreTrimmedInvalidCurrency
+    );
+    return console.log("ticker " + trimmedInvalidCurrency + " INVALID");
+  }
   if (type !== AGGREGATE_INDEX || newPrice === undefined) {
     return;
   }
+
   const handlers = tickersHandlers.get(currency) ?? [];
   handlers.forEach((fn) => fn(newPrice));
 });
