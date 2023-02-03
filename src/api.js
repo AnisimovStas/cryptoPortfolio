@@ -8,26 +8,31 @@ const socket = new WebSocket(
 const AGGREGATE_INDEX = "5";
 const INVALID_SUB = "500";
 socket.addEventListener("message", (e) => {
-  const {
+  // Приходит ответ, парсим его по форме ниже
+  let {
     TYPE: type,
     FROMSYMBOL: currency,
     PRICE: newPrice,
     PARAMETER: invalidCurrency,
   } = JSON.parse(e.data);
+  // На случай ответа что тикера нет в паре к доллару
+  if (type == INVALID_SUB) {
+    // преобразую 5~CCCAGG~${ticker}~USD в  ticker
+    let preTrimmedInvalidCurrency = invalidCurrency.slice(9);
+    let tailOfPreTrimmedInvalidCurrency =
+      preTrimmedInvalidCurrency.indexOf("~");
+    let trimmedInvalidCurrency = preTrimmedInvalidCurrency.slice(
+      0,
+      tailOfPreTrimmedInvalidCurrency
+    );
 
-  if (type !== AGGREGATE_INDEX || newPrice === undefined) {
-    if (type == INVALID_SUB) {
-      let preTrimmedInvalidCurrency = invalidCurrency.slice(9);
-      let tailOfPreTrimmedInvalidCurrency =
-        preTrimmedInvalidCurrency.indexOf("~");
-      let trimmedInvalidCurrency = preTrimmedInvalidCurrency.slice(
-        0,
-        tailOfPreTrimmedInvalidCurrency
-      );
-      invalidCurrencyToBtc(trimmedInvalidCurrency);
-      return console.log("ticker_" + trimmedInvalidCurrency + "_INVALID");
-    }
-    return;
+    // Проверяю все ли ок с обрезкой
+    console.log("ticker_" + trimmedInvalidCurrency + "_INVALID");
+    // Задаю цену, по схеме ticker > btc>usd (тут и ошибка, promise вместо значения ( хотя в консоль логе invalidCurrencyToBtc все ок))
+    // Если добавить  newPrice = await .... выдаст ошибку, типо откуда тут await вообще
+    newPrice = invalidCurrencyToBtc(trimmedInvalidCurrency);
+    // Он даже промис fulfilled написал,  и PromiseResult с ценой выдал
+    console.log(newPrice);
   }
 
   const handlers = tickersHandlers.get(currency) ?? [];
@@ -76,22 +81,31 @@ export const unsubscribeFromTicker = (ticker) => {
 };
 
 async function invalidCurrencyToBtc(currency) {
+  // Запрашиваю ticker к btc
   const response = await fetch(
     "https://min-api.cryptocompare.com/data/price?fsym=" +
       currency +
       "&tsyms=BTC"
   );
   const price = await response.json();
+  // Проверяю что пришло в ответе
   if (price.BTC) {
+    // Консоль лог что все ок, цена на Ticker/btc имеется
     console.log("ticker " + currency + " price to BTC IS: " + price.BTC);
+    // Запрашиваю стоимость BTC/USD
     const responseBtcToUsd = await fetch(
       "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD"
     );
     const btcPrice = await responseBtcToUsd.json();
     console.log("BTC price to USD IS: " + btcPrice.USD);
-    const crossBtcPrice = (await price.BTC) / btcPrice.USD;
+    // Добавляю кросс Курс ticker'а через btc
+    const crossBtcPrice = (await price.BTC) * btcPrice.USD;
+
     console.log("ticker " + currency + " price to USD IS: " + crossBtcPrice);
+    // Функция возвращает это значение ( по сути возвращает то, что не смог вебсокет)
+    return await crossBtcPrice;
   } else {
-    console.log("ticker " + currency + " have'nt trade pair to BTC");
+    // Если цены в ответе нет, то консоль лог что сорри, цены нет ( пока, дальше нужно будет перекрасить класс на крассный)
+    return console.log("ticker " + currency + " have'nt trade pair to BTC");
   }
 }
