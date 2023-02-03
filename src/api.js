@@ -7,7 +7,7 @@ const socket = new WebSocket(
 );
 const AGGREGATE_INDEX = "5";
 const INVALID_SUB = "500";
-socket.addEventListener("message", (e) => {
+socket.addEventListener("message", async (e) => {
   // Приходит ответ, парсим его по форме ниже
   let {
     TYPE: type,
@@ -28,9 +28,9 @@ socket.addEventListener("message", (e) => {
 
     // Проверяю все ли ок с обрезкой
     console.log("ticker_" + trimmedInvalidCurrency + "_INVALID");
-    // Задаю цену, по схеме ticker > btc>usd (тут и ошибка, promise вместо значения ( хотя в консоль логе invalidCurrencyToBtc все ок))
-    // Если добавить  newPrice = await .... выдаст ошибку, типо откуда тут await вообще
-    newPrice = invalidCurrencyToBtc(trimmedInvalidCurrency);
+    // Задаю цену, по схеме ticker > btc>usd
+    currency = trimmedInvalidCurrency;
+    newPrice = await invalidCurrencyToBtc(trimmedInvalidCurrency);
     // Он даже промис fulfilled написал,  и PromiseResult с ценой выдал
     console.log(newPrice);
   }
