@@ -14,7 +14,12 @@ socket.addEventListener("message", async (e) => {
     FROMSYMBOL: currency,
     PRICE: newPrice,
     PARAMETER: invalidCurrency,
+    FLAGS: flags,
   } = JSON.parse(e.data);
+  if ((type !== AGGREGATE_INDEX && type !== INVALID_SUB) || flags == 4) {
+    return;
+  }
+
   // На случай ответа что тикера нет в паре к доллару
   if (type == INVALID_SUB) {
     // преобразую 5~CCCAGG~${ticker}~USD в  ticker
@@ -103,7 +108,7 @@ async function invalidCurrencyToBtc(currency) {
 
     console.log("ticker " + currency + " price to USD IS: " + crossBtcPrice);
     // Функция возвращает это значение ( по сути возвращает то, что не смог вебсокет)
-    return await crossBtcPrice;
+    return crossBtcPrice;
   } else {
     // Если цены в ответе нет, то консоль лог что сорри, цены нет ( пока, дальше нужно будет перекрасить класс на крассный)
     return console.log("ticker " + currency + " have'nt trade pair to BTC");
