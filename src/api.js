@@ -91,7 +91,6 @@ async function invalidCurrencyToBtc(currency) {
     console.log("BTC price to USD IS: " + btcPrice.USD);
     const crossBtcPrice = (await price.BTC) / btcPrice.USD;
     console.log("ticker " + currency + " price to USD IS: " + crossBtcPrice);
-    currency.price = crossBtcPrice;
   } else {
     console.log("ticker " + currency + " have'nt trade pair to BTC");
   }
