@@ -215,7 +215,7 @@ export default {
       });
     }
 
-    setInterval(this.updateTickers, 5000);
+    setInterval(this.updateTicker, 5000);
   },
 
   computed: {

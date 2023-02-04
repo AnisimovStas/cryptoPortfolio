@@ -36,6 +36,7 @@ socket.addEventListener("message", async (e) => {
     // Задаю цену, по схеме ticker > btc>usd
     currency = trimmedInvalidCurrency;
     newPrice = await invalidCurrencyToBtc(trimmedInvalidCurrency);
+
     // Он даже промис fulfilled написал,  и PromiseResult с ценой выдал
     console.log(newPrice);
   }
