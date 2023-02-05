@@ -74,11 +74,17 @@
             class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer"
           >
             <div class="px-4 py-5 sm:p-6 text-center">
-              <dt class="text-sm font-medium text-gray-500 truncate">
+              <dt
+                :class="{
+                  ' font-medium text-gray-500 truncate': t.priced,
+                  ' font-medium text-red-500 truncate': !t.priced,
+                }"
+              >
                 {{ t.name }} - USD
               </dt>
               <dd class="mt-1 text-3xl font-semibold text-gray-900">
                 {{ formatPrice(t.price) }}
+                {{ paintPricelessTickets(t) }}
               </dd>
             </div>
             <div class="w-full border-t border-gray-200"></div>
@@ -261,6 +267,12 @@ export default {
   },
 
   methods: {
+    paintPricelessTickets(ticker) {
+      console.log(ticker.name, ticker.price, ticker.priced);
+      if (ticker.price !== "-" && ticker.price !== undefined) {
+        ticker.priced = true;
+      }
+    },
     updateTicker(tickerName, price) {
       this.tickers
         .filter((t) => t.name === tickerName)
@@ -283,6 +295,7 @@ export default {
       const currentTicker = {
         name: this.ticker,
         price: "-",
+        priced: false,
       };
 
       this.tickers = [...this.tickers, currentTicker];
