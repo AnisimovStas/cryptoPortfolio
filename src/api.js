@@ -35,9 +35,6 @@ socket.addEventListener("message", async (e) => {
     // Задаю цену, по схеме ticker > btc>usd
     currency = trimmedInvalidCurrency;
     newPrice = await invalidCurrencyToBtc(trimmedInvalidCurrency);
-
-    // Он даже промис fulfilled написал,  и PromiseResult с ценой выдал
-    console.log(newPrice);
   }
 
   const handlers = tickersHandlers.get(currency) ?? [];
@@ -95,14 +92,11 @@ async function invalidCurrencyToBtc(currency) {
   const price = await response.json();
   // Проверяю что пришло в ответе
   if (price.BTC) {
-    // Консоль лог что все ок, цена на Ticker/btc имеется
-    console.log("ticker " + currency + " price to BTC IS: " + price.BTC);
     // Запрашиваю стоимость BTC/USD
     const responseBtcToUsd = await fetch(
       "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD"
     );
     const btcPrice = await responseBtcToUsd.json();
-    console.log("BTC price to USD IS: " + btcPrice.USD);
     // Добавляю кросс Курс ticker'а через btc
     const crossBtcPrice = (await price.BTC) * btcPrice.USD;
 

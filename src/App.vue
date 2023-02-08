@@ -236,7 +236,6 @@ export default {
     },
 
     paintPricelessTickets(ticker) {
-      console.log(ticker.name, ticker.price, ticker.priced);
       if (ticker.price !== "-" && ticker.price !== undefined) {
         ticker.priced = true;
       }
@@ -297,9 +296,7 @@ export default {
       this.$nextTick().then(this.calculateMaxGraphElements);
     },
 
-    tickers(newValue, oldValue) {
-      // Почему не сработал watch при добавлении?
-      console.log(newValue === oldValue);
+    tickers() {
       localStorage.setItem("cryptonomicon-list", JSON.stringify(this.tickers));
     },
 
