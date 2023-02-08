@@ -76,6 +76,7 @@
         </h3>
 
         <graph-section
+          @update-maxGraphElements="updateGraph"
           :selectedTicker="selectedTicker"
           :graph="graph"
           @un-select-ticker="selectedTicker = null"
@@ -134,13 +135,6 @@ export default {
 
     setInterval(this.updateTicker, 5000);
   },
-  mounted() {
-    window.addEventListener("resize", this.calculateMaxGraphElements);
-  },
-
-  beforeUnmount() {
-    window.removeEventListener("resize", this.calculateMaxGraphElements);
-  },
 
   computed: {
     tooManyTickersAdded() {
@@ -175,6 +169,11 @@ export default {
   },
 
   methods: {
+    updateGraph(maxGraphElements) {
+      while (this.graph.length > maxGraphElements) {
+        this.graph.shift();
+      }
+    },
     paintPricelessTickets(ticker) {
       if (ticker.price !== "-" && ticker.price !== undefined) {
         ticker.priced = true;
@@ -186,9 +185,6 @@ export default {
         .forEach((t) => {
           if (t === this.selectedTicker) {
             this.graph.push(price);
-            while (this.graph.length > this.maxGraphElements) {
-              this.graph.shift();
-            }
           }
           t.price = price;
         });
@@ -233,7 +229,6 @@ export default {
   watch: {
     selectedTicker() {
       this.graph = [];
-      this.$nextTick().then(this.calculateMaxGraphElements);
     },
 
     tickers() {

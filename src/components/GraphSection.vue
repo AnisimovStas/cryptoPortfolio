@@ -44,8 +44,18 @@ export default {
     graph: { type: Array },
     selectedTicker: { type: Object },
   },
+  emits: ["update-maxGraphElements", "un-select-ticker"],
+
   data() {
     return { maxGraphElements: 1 };
+  },
+  mounted() {
+    this.calculateMaxGraphElements();
+    window.addEventListener("resize", this.calculateMaxGraphElements);
+  },
+
+  beforeUnmount() {
+    window.removeEventListener("resize", this.calculateMaxGraphElements);
   },
   computed: {
     normalizedGraph() {
@@ -66,7 +76,19 @@ export default {
       if (!this.$refs.graph) {
         return;
       }
-      this.maxGraphElements = this.$refs.graph.clientWidth / 38;
+      this.maxGraphElements = Math.floor(this.$refs.graph.clientWidth / 38);
+      console.log(
+        "Может быть максимум столбцов в графике " + this.maxGraphElements
+      );
+      this.$emit("update-maxGraphElements", this.maxGraphElements);
+    },
+  },
+  watch: {
+    graph: {
+      handler: function () {
+        this.calculateMaxGraphElements();
+      },
+      deep: true,
     },
   },
 };
