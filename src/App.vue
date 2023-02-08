@@ -74,19 +74,12 @@
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
           {{ selectedTicker.name }} - USD
         </h3>
-        <div
-          class="flex items-end border-gray-600 border-b border-l h-64"
-          ref="graph"
-        >
-          <div
-            v-for="(bar, idx) in normalizedGraph"
-            :key="idx"
-            :style="{ height: `${bar}%` }"
-            class="bg-purple-800 border w-10"
-          ></div>
-        </div>
 
-        <graph-section @un-select-ticker="selectedTicker = null" />
+        <graph-section
+          :selectedTicker="selectedTicker"
+          :graph="graph"
+          @un-select-ticker="selectedTicker = null"
+        />
       </section>
     </div>
   </div>
@@ -110,7 +103,7 @@ export default {
       tickers: [],
       selectedTicker: null,
       graph: [],
-      maxGraphElements: 1,
+
       page: 1,
     };
   },
@@ -173,19 +166,6 @@ export default {
       return this.filteredTickers.length > this.endIndex;
     },
 
-    normalizedGraph() {
-      const maxValue = Math.max(...this.graph);
-      const minValue = Math.min(...this.graph);
-
-      if (maxValue === minValue) {
-        return this.graph.map(() => 50);
-      }
-
-      return this.graph.map(
-        (price) => 5 + ((price - minValue) * 95) / (maxValue - minValue)
-      );
-    },
-
     pageStateOptions() {
       return {
         filter: this.filter,
@@ -195,13 +175,6 @@ export default {
   },
 
   methods: {
-    calculateMaxGraphElements() {
-      if (!this.$refs.graph) {
-        return;
-      }
-      this.maxGraphElements = this.$refs.graph.clientWidth / 38;
-    },
-
     paintPricelessTickets(ticker) {
       if (ticker.price !== "-" && ticker.price !== undefined) {
         ticker.priced = true;

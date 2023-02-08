@@ -1,4 +1,15 @@
 <template>
+  <div
+    class="flex items-end border-gray-600 border-b border-l h-64"
+    ref="graph"
+  >
+    <div
+      v-for="(bar, idx) in normalizedGraph"
+      :key="idx"
+      :style="{ height: `${bar}%` }"
+      class="bg-purple-800 border w-10"
+    ></div>
+  </div>
   <button
     @click="$emit('un-select-ticker')"
     type="button"
@@ -28,5 +39,35 @@
   </button>
 </template>
 <script>
-export default {};
+export default {
+  props: {
+    graph: { type: Array },
+    selectedTicker: { type: Object },
+  },
+  data() {
+    return { maxGraphElements: 1 };
+  },
+  computed: {
+    normalizedGraph() {
+      const maxValue = Math.max(...this.graph);
+      const minValue = Math.min(...this.graph);
+
+      if (maxValue === minValue) {
+        return this.graph.map(() => 50);
+      }
+
+      return this.graph.map(
+        (price) => 5 + ((price - minValue) * 95) / (maxValue - minValue)
+      );
+    },
+  },
+  methods: {
+    calculateMaxGraphElements() {
+      if (!this.$refs.graph) {
+        return;
+      }
+      this.maxGraphElements = this.$refs.graph.clientWidth / 38;
+    },
+  },
+};
 </script>
