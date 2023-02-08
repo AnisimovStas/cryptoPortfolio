@@ -197,7 +197,7 @@ export default {
     },
 
     formatPrice(price) {
-      if (price == undefined) {
+      if (!price || typeof price !== "number") {
         return (price = "-");
       }
       return price > 1 ? price.toFixed(2) : price.toPrecision(2);
