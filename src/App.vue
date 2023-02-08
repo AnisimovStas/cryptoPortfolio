@@ -85,7 +85,13 @@
     </div>
   </div>
 </template>
+<!-- 
+Какие есть проблемы:
+1) Если тикера нет в базе WebSocket'a, то он либо не обновляется, либо обновление стоимости идет в в формате N*2 каждый запрос  из за двойного SetInterval'a
+2) Не работает вторая вкладка
+3) при добавлении тикера, не обнуляется импут, хотя должен 
 
+-->
 <script>
 import { subscribeToTicker, unsubscribeFromTicker } from "./api";
 import AddTicker from "./components/AddingTicker.vue";
