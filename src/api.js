@@ -29,7 +29,13 @@ socket.addEventListener("message", async (e) => {
       0,
       tailOfPreTrimmedInvalidCurrency
     );
-
+    // В целом работает, но колличество запросов со временем увеличивается логарифмически
+    //  setInterval(() => {
+    //  sendToWebSocket({
+    //action: "SubAdd",
+    //  subs: [`5~CCCAGG~${trimmedInvalidCurrency}~USD`],
+    //});
+    //}, 10000);
     // Проверяю все ли ок с обрезкой
     console.log("ticker_" + trimmedInvalidCurrency + "_INVALID");
     // Задаю цену, по схеме ticker > btc>usd
